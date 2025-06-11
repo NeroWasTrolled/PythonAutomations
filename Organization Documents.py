@@ -39,57 +39,42 @@ common_extensions = {
 
 def organizar_arquivos(source_folder, destination_root, programming_folder, office_folder):
     for root, dirs, files in os.walk(source_folder):
-        file_extensions = [os.path.splitext(filename)[1][1:].lower() for filename in files]
-
-        programming_files = [ext for ext in file_extensions if ext in programming_extensions]
-        if programming_files:
-            extension_count = Counter(programming_files)
-            dominant_extension = extension_count.most_common(1)[0][0]
-
-            if len(programming_files) > 1:
-                project_folder = os.path.join(programming_folder, programming_extensions[dominant_extension])
-                os.makedirs(project_folder, exist_ok=True)
-
-                project_destination = os.path.join(project_folder, os.path.basename(root))
-                shutil.move(root, project_destination)
-                print(f"Projeto movido: {root} -> {project_destination}")
-                continue
-
-        office_files = [ext for ext in file_extensions if ext in office_extensions]
-        if office_files:
-            for filename in files:
-                file_path = os.path.join(root, filename)
-                if destination_root in file_path:
-                    continue
-
-                file_extension = os.path.splitext(filename)[1][1:].lower()
-                if file_extension in office_extensions:
-                    office_subfolder = os.path.join(office_folder, office_extensions[file_extension])
-                    os.makedirs(office_subfolder, exist_ok=True)
-
-                    destination_path = os.path.join(office_subfolder, filename)
-                    shutil.move(file_path, destination_path)
-                    print(f"Movido para Office: {file_path} -> {destination_path}")
-
-            continue
-
         for filename in files:
             file_path = os.path.join(root, filename)
-            if destination_root in file_path:
+            file_extension = os.path.splitext(filename)[1][1:].lower()
+
+            if destination_root in file_path or programming_folder in file_path or office_folder in file_path:
                 continue
 
-            file_extension = os.path.splitext(filename)[1][1:].lower()
-            if file_extension in common_extensions:
-                destination_folder = os.path.join(destination_root, common_extensions[file_extension])
+            if file_extension in programming_extensions:
+                dest_subfolder = os.path.join(programming_folder, programming_extensions[file_extension])
+                os.makedirs(dest_subfolder, exist_ok=True)
+                destination_path = os.path.join(dest_subfolder, filename)
+                shutil.move(file_path, destination_path)
+                print(f"Movido para Programação: {file_path} -> {destination_path}")
+
+            elif file_extension in office_extensions:
+                dest_subfolder = os.path.join(office_folder, office_extensions[file_extension])
+                os.makedirs(dest_subfolder, exist_ok=True)
+                destination_path = os.path.join(dest_subfolder, filename)
+                shutil.move(file_path, destination_path)
+                print(f"Movido para Documentos: {file_path} -> {destination_path}")
+
+            elif file_extension in common_extensions:
+                dest_subfolder = os.path.join(destination_root, common_extensions[file_extension])
+                os.makedirs(dest_subfolder, exist_ok=True)
+                destination_path = os.path.join(dest_subfolder, filename)
+                shutil.move(file_path, destination_path)
+                print(f"Movido para Geral: {file_path} -> {destination_path}")
+
             else:
-                destination_folder = os.path.join(destination_root, "Outros")
-
-            os.makedirs(destination_folder, exist_ok=True)
-
-            destination_path = os.path.join(destination_folder, filename)
-            shutil.move(file_path, destination_path)
-            print(f"Movido: {file_path} -> {destination_path}")
+                dest_subfolder = os.path.join(destination_root, "Outros")
+                os.makedirs(dest_subfolder, exist_ok=True)
+                destination_path = os.path.join(dest_subfolder, filename)
+                shutil.move(file_path, destination_path)
+                print(f"Movido para Outros: {file_path} -> {destination_path}")
 
     print("Organização completa! Todos os arquivos foram movidos para as pastas apropriadas.")
+
 
 organizar_arquivos(source_folder, destination_root, programming_folder, office_folder)
